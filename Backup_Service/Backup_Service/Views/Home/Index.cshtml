@@ -1,8 +1,19 @@
-﻿@{
+﻿@model IEnumerable<Backup_Service.Models.FileModel>
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<left> <h1> Backup Service </h1> </left>
+    <h3>Выберите файл для загрузки</h3>
+<form asp-action="AddFile" asp-controller="Home" method="post" enctype="multipart/form-data">
+    <input type="file" name="uploads" /><br>
+    <input type="file" name="uploads" /><br>
+    <input type="file" name="uploads" /><br>
+    <input type="submit" value="Загрузить" />
+</form>
+ 
+<h3>Все файлы</h3>
+@foreach(var f in Model)
+{
+    <p><img src="@Url.Content(f.Path)"></p>
+}

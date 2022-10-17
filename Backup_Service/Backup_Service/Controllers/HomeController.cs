@@ -44,7 +44,12 @@ namespace Backup_Service.Controllers
                     }
                 }
             }
-            return Ok(new { files.Count, size, filePaths });
+            return Ok(new { files.Count, size, filePaths  });
+        }
+        public FileResult Download(string FileName)
+        {
+            var filePath = Path.Combine(Directory.GetCurrentDirectory() + "/wwwroot/Files/" + FileName);
+            return File(filePath, "C:/users/Max/Downloads", Path.GetFileName(filePath));
         }
         public IActionResult Index()
         {

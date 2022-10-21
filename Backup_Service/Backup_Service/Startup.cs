@@ -1,5 +1,3 @@
-using Backup_Service.Data;
-using Backup_Service.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +19,6 @@ namespace Backup_Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddScoped<IUploadFiles, UploadFiles>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

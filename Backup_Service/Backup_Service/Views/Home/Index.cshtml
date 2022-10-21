@@ -1,19 +1,39 @@
-﻿@model List<string>
+﻿@model Backup_Service.Models.FilesViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<left> <h1> Backup Service </h1> </left>
-<form method="post" enctype="multipart/form-data" asp-controller="FileUpload" asp-action="Index">
-    <div class="form-group">
-        <div class="col-md-10">
-            <p>Upload one or more files using this form:</p>
-            <input type="file" name="files" multiple />
+<div class="text-left">
+    <h2 style="margin-bottom:50px">Backup Service</h2>
+
+    <!-- In order to post files to server we should use form with post method, also need to add multipart/form-data encoding.
+         Otherwise the files will not sent to the server. -->
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple />
+        <button type="submit">Upload</button>
+    </form>
+
+    <!-- To show the success message to the user  -->
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-success" style="margin-top:50px">
+            @ViewBag.Message
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            <input type="submit" value="Upload" />
-        </div>
-    </div>
-</form>
+    }
+
+    <p style="margin-top: 50px">List of Files</p>
+    <!-- Get all the files from the server -->
+    <ul>
+        @foreach (var item in Model.Files)
+        {
+            <li>
+                <a asp-action="Download"
+                   asp-route-filename="@item.Name">
+                    @item.Name
+                </a>
+            </li>
+        }
+    </ul>
+
+</div>

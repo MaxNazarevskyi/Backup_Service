@@ -24,10 +24,10 @@ namespace Backup_Service.Controllers
         {
             // Get files from the server
             var model = new FilesViewModel();
-            foreach (var item in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Upload")))
+            foreach (var item in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload")))
             {
                 model.Files.Add(
-                    new FileDetails { Name = System.IO.Path.GetFileName(item), Path = item });
+                    new FileDetails { Name = Path.GetFileName(item), Path = item });
             }
             return View(model);
         }
@@ -39,10 +39,10 @@ namespace Backup_Service.Controllers
             foreach (var file in files)
             {
                 // Get the file name from the browser
-                var fileName = System.IO.Path.GetFileName(file.FileName);
+                var fileName = Path.GetFileName(file.FileName);
 
                 // Get file path to be uploaded
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Upload", fileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", fileName);
 
                 // Check If file with same name exists and delete it
                 if (System.IO.File.Exists(filePath))
@@ -61,10 +61,10 @@ namespace Backup_Service.Controllers
 
             // Get files from the server
             var model = new FilesViewModel();
-            foreach (var item in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Upload")))
+            foreach (var item in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload")))
             {
                 model.Files.Add(
-                    new FileDetails { Name = System.IO.Path.GetFileName(item), Path = item });
+                    new FileDetails { Name = Path.GetFileName(item), Path = item });
             }
             return View(model);
         }
@@ -74,7 +74,7 @@ namespace Backup_Service.Controllers
             if (filename == null)
                 return Content("filename is not availble");
 
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "Upload", filename);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", filename);
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))

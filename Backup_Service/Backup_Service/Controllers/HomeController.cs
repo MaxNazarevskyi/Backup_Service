@@ -11,18 +11,20 @@ using System.Threading.Tasks;
 using System.Text;
 using Microsoft.AspNetCore.Hosting;
 using System.IO.Compression;
+using ICSharpCode.SharpZipLib.Zip;
+using ICSharpCode.SharpZipLib.Core;
 
 namespace Backup_Service.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IWebHostEnvironment hostEnvironment;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostEnvironment)
         {
             _logger = logger;
-            this.hostEnvironment = hostEnvironment;
+            _hostEnvironment = hostEnvironment;
         }
 
         public IActionResult Index()
@@ -45,16 +47,16 @@ namespace Backup_Service.Controllers
             {
                 // Get the file name from the browser
                 var fileName = Path.GetFileName(file.FileName);
-        
+
                 // Get file path to be uploaded
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", fileName);
-        
+
                 // Check If file with same name exists and delete it
                 if (System.IO.File.Exists(filePath))
                 {
                     System.IO.File.Delete(filePath);
                 }
-        
+
                 // Create a new local file and copy contents of uploaded file
                 using (var localFile = System.IO.File.OpenWrite(filePath))
                 using (var uploadedFile = file.OpenReadStream())
@@ -63,7 +65,7 @@ namespace Backup_Service.Controllers
                 }
             }
             ViewBag.Message = "Files are successfully uploaded";
-        
+
             // Get files from the server
             var model = new FilesViewModel();
             foreach (var item in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload")))
@@ -73,27 +75,48 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
-        public async Task DownloadArchive()
+        public FileResult DownloadArchive(IFormFile[] files)
         {
-            //string zipName = String.Format("Zip_{0}.zip", DateTime.Now.ToString("yyyy-MMM-dd-HHmmss"));
-            Response.ContentType = "application/octet-stream";
-            Response.Headers.Add("Content-Disposition","attachment; filename=\"MyFiles.zip\"");
-
-            var FolderPath = Path.Combine(hostEnvironment.ContentRootPath, "wwwroot/Upload");
+            var fileName = "MyZip.zip";
+            var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
-            using (ZipArchive archive = new ZipArchive(Response.BodyWriter.AsStream(), ZipArchiveMode.Create))
+            var PathToFiles = Path.Combine(FolderPath + FilePaths);
+
+            using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));
             {
+                zipOutputStream.SetLevel(9);
+
+                byte[] buffer = new byte[4094];
+
                 foreach (var FilePath in FilePaths)
                 {
-                    var botFileName = Path.GetFileName(FilePath);
-                    var entry = archive.CreateEntry(botFileName);
-                    using (var entryStream = entry.Open())
-                    using (var fileStream = System.IO.File.OpenRead(FilePath))
+                    var FileName = Path.GetFileName(FilePath);
+                    var CleanName = ZipEntry.CleanName(FileName);
+                    ZipEntry entry = new ZipEntry(CleanName);
+                    entry.DateTime = DateTime.Now;
+                    entry.IsUnicodeText = true;
+                    zipOutputStream.PutNextEntry(entry);
+                    using (FileStream fileStream = System.IO.File.OpenRead(FilePath))
                     {
-                        await fileStream.CopyToAsync(entryStream);
+                        int sourceBytes;
+                        do
+                        {
+                            sourceBytes = fileStream.Read(buffer, 0, buffer.Length);
+                            zipOutputStream.Write(buffer, 0, sourceBytes);
+                        } while (sourceBytes > 0);
                     }
+                    zipOutputStream.CloseEntry();
                 }
+                zipOutputStream.Finish();
+                zipOutputStream.Flush();
+                zipOutputStream.Close();
             }
+            byte[] finalResult = System.IO.File.ReadAllBytes(PathToFiles);
+            if (System.IO.File.Exists(PathToFiles))
+            {
+                System.IO.File.Delete(PathToFiles);
+            }
+            return File(finalResult, "application/zip", fileName);
         }
 
         public async Task<IActionResult> Download(string filename)

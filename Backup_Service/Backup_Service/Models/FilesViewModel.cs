@@ -7,7 +7,7 @@ namespace Backup_Service.Models
     {
         public string Name { get; set; }
         public string Path { get; set; }
-        public bool IsSelected { get; set; }
+        public bool Selected { get; set; }
     }
 
     public class FilesViewModel

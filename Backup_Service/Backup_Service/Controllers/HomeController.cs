@@ -75,7 +75,7 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
-        public FileResult DownloadArchive(IFormFile[] files)
+        public FileResult DownloadArchive(int compressionLevel)
         {
             var fileName = "MyZip.zip";
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
@@ -84,7 +84,7 @@ namespace Backup_Service.Controllers
 
             using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));
             {
-                zipOutputStream.SetLevel(9);
+                zipOutputStream.SetLevel(compressionLevel);
 
                 byte[] buffer = new byte[4094];
 

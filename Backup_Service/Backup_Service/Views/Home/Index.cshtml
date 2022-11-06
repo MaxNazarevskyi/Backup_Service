@@ -17,8 +17,9 @@
     <!-- To show the success message to the user  -->
     @if (ViewBag.Message != null)
     {
-        <div class="alert alert-success" style="margin-top:50px">
+        <div class="alert alert-success alert-dismissible" style="margin-top:50px">
             @ViewBag.Message
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
         </div>
     }
 
@@ -35,8 +36,12 @@
             </li>
         }
     </ul>
-
+    <form asp-controller="Home" asp-action="DownloadArchive" method="get">
+        <td>Enter compression level (0-9)</td>
+        <input type="number" name="compressionLevel" value=""/>
+        <br /><br />
+        <p class="text-left">
+            <button class="btn btn-primary" type="submit" download>Download all files</button>
+        </p>
+    </form>
 </div>
-<p class="text-left">
-    <a class="btn btn-primary" asp-controller="Home" asp-action="DownloadArchive" download>Download all files</a>
-</p>

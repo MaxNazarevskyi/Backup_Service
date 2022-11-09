@@ -75,19 +75,16 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
-        public FileResult DownloadArchive(int compressionLevel)
+        //[HttpGet("{compressionLevel}")]
+        public IActionResult DownloadArchive(int compressionLevel)
         {
-            var fileName = "MyZip.zip";
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
             var PathToFiles = Path.Combine(FolderPath + FilePaths);
-
             using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));
             {
                 zipOutputStream.SetLevel(compressionLevel);
-
                 byte[] buffer = new byte[4094];
-
                 foreach (var FilePath in FilePaths)
                 {
                     var FileName = Path.GetFileName(FilePath);
@@ -96,29 +93,47 @@ namespace Backup_Service.Controllers
                     entry.DateTime = DateTime.Now;
                     entry.IsUnicodeText = true;
                     zipOutputStream.PutNextEntry(entry);
-                    using (FileStream fileStream = System.IO.File.OpenRead(FilePath))
-                    {
-                        int sourceBytes;
-                        do
+                        using (FileStream fileStream = System.IO.File.OpenRead(FilePath))
                         {
-                            sourceBytes = fileStream.Read(buffer, 0, buffer.Length);
-                            zipOutputStream.Write(buffer, 0, sourceBytes);
-                        } while (sourceBytes > 0);
-                    }
+                            int sourceBytes;
+                            do
+                            {
+                                sourceBytes = fileStream.Read(buffer, 0, buffer.Length);
+                                zipOutputStream.Write(buffer, 0, sourceBytes);
+
+                            } while (sourceBytes > 0);
+                        }
                     zipOutputStream.CloseEntry();
                 }
                 zipOutputStream.Finish();
                 zipOutputStream.Flush();
                 zipOutputStream.Close();
             }
+            DeletingTemp();
+            CreatingBackup();
+            return Content("OK");
+        }
+        public void CreatingBackup()
+        {
+            var fileName = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + ".zip";
+            var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
+            var FilePaths = Directory.GetFiles(FolderPath);
+            var PathToFiles = Path.Combine(FolderPath + FilePaths);
             byte[] finalResult = System.IO.File.ReadAllBytes(PathToFiles);
             if (System.IO.File.Exists(PathToFiles))
             {
                 System.IO.File.Delete(PathToFiles);
             }
-            return File(finalResult, "application/zip", fileName);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", fileName);
+            System.IO.File.WriteAllBytes(filePath, finalResult); // Creating backup
         }
-
+        public void DeletingTemp()
+        {
+            var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
+            var FilePaths = Directory.GetFiles(FolderPath);
+            foreach (string file in FilePaths)
+                System.IO.File.Delete(file);    //Deleting Uploads
+        }
         public async Task<IActionResult> Download(string filename)
         {
             if (filename == null)

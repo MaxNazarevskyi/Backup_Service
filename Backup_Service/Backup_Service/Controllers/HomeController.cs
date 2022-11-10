@@ -75,7 +75,8 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
-        //[HttpGet("{compressionLevel}")]
+
+        [HttpGet]
         public IActionResult DownloadArchive(int compressionLevel)
         {
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
@@ -111,7 +112,7 @@ namespace Backup_Service.Controllers
             }
             DeletingTemp();
             CreatingBackup();
-            return Content("OK");
+            return View("Archives");
         }
         public void CreatingBackup()
         {
@@ -125,7 +126,7 @@ namespace Backup_Service.Controllers
                 System.IO.File.Delete(PathToFiles);
             }
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", fileName);
-            System.IO.File.WriteAllBytes(filePath, finalResult); // Creating backup
+            System.IO.File.WriteAllBytes(filePath, finalResult); //Creating backup
         }
         public void DeletingTemp()
         {
@@ -134,46 +135,7 @@ namespace Backup_Service.Controllers
             foreach (string file in FilePaths)
                 System.IO.File.Delete(file);    //Deleting Uploads
         }
-        public async Task<IActionResult> Download(string filename)
-        {
-            if (filename == null)
-                return Content("filename is not availble");
-
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", filename);
-
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                await stream.CopyToAsync(memory);
-            }
-            memory.Position = 0;
-            return File(memory, GetContentType(path), Path.GetFileName(path));
-        }
-
-        private string GetContentType(string path)
-        {
-            var types = GetMimeTypes();
-            var ext = Path.GetExtension(path).ToLowerInvariant();
-            return types[ext];
-        }
-        private Dictionary<string, string> GetMimeTypes()
-        {
-            return new Dictionary<string, string>
-            {
-                {".txt", "text/plain"},
-                {".pdf", "application/pdf"},
-                {".doc", "application/vnd.ms-word"},
-                {".docx", "application/vnd.ms-word"},
-                {".xls", "application/vnd.ms-excel"},
-                {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-                {".png", "image/png"},
-                {".jpg", "image/jpeg"},
-                {".jpeg", "image/jpeg"},
-                {".gif", "image/gif"},
-                {".csv", "text/csv"},
-                {".mp3", "music/mp3"}
-            };
-        }
+       
         public IActionResult Privacy()
         {
             return View();

@@ -12,7 +12,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Properties\" />
-	  <Folder Include="Services\" />
 	  <Folder Include="wwwroot\Backups\" />
 	  <Folder Include="wwwroot\Upload\" />
 	</ItemGroup>

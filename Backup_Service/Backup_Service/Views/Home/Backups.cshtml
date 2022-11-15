@@ -1,0 +1,20 @@
+﻿@model Backup_Service.Models.ArchivesModel
+@{
+    ViewData["Title"] = "Backups";
+}
+<body style="background-color:rgb(197, 208, 220);">
+<div class="text-left">
+    <h2 style="margin-bottom:50px">Backups</h2>
+    <p style="margin-top: 50px">List of backups</p>
+    <!-- Get all the archives from the server -->
+    <ul>
+        @foreach (var item in Model.Archives)
+        {
+            <li>
+                  @item.ArchiveName
+            </li>
+        }
+    </ul>
+
+</div>
+</body>

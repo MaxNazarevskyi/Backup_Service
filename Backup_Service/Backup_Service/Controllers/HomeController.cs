@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
+using Backup_Service.Services;
 
 namespace Backup_Service.Controllers
 {
@@ -20,9 +21,11 @@ namespace Backup_Service.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IArchiveService _archiveService;
 
-        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostEnvironment)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostEnvironment, IArchiveService archiveService)
         {
+            _archiveService = archiveService;
             _logger = logger;
             _hostEnvironment = hostEnvironment;
         }
@@ -42,22 +45,17 @@ namespace Backup_Service.Controllers
         [HttpPost]
         public IActionResult Index(IFormFile[] files)
         {
-            // Iterate each files
             foreach (var file in files)
             {
-                // Get the file name from the browser
                 var fileName = Path.GetFileName(file.FileName);
 
-                // Get file path to be uploaded
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", fileName);
 
-                // Check If file with same name exists and delete it
                 if (System.IO.File.Exists(filePath))
                 {
                     System.IO.File.Delete(filePath);
                 }
 
-                // Create a new local file and copy contents of uploaded file
                 using (var localFile = System.IO.File.OpenWrite(filePath))
                 using (var uploadedFile = file.OpenReadStream())
                 {
@@ -82,28 +80,32 @@ namespace Backup_Service.Controllers
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
             var PathToFiles = Path.Combine(FolderPath + FilePaths);
+
             using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));
             {
                 zipOutputStream.SetLevel(compressionLevel);
+
                 byte[] buffer = new byte[4094];
+
                 foreach (var FilePath in FilePaths)
                 {
                     var FileName = Path.GetFileName(FilePath);
                     var CleanName = ZipEntry.CleanName(FileName);
                     ZipEntry entry = new ZipEntry(CleanName);
+
                     entry.DateTime = DateTime.Now;
                     entry.IsUnicodeText = true;
                     zipOutputStream.PutNextEntry(entry);
-                        using (FileStream fileStream = System.IO.File.OpenRead(FilePath))
+                    using (FileStream fileStream = System.IO.File.OpenRead(FilePath))
+                    {
+                        int sourceBytes;
+                        do
                         {
-                            int sourceBytes;
-                            do
-                            {
-                                sourceBytes = fileStream.Read(buffer, 0, buffer.Length);
-                                zipOutputStream.Write(buffer, 0, sourceBytes);
+                            sourceBytes = fileStream.Read(buffer, 0, buffer.Length);
+                            zipOutputStream.Write(buffer, 0, sourceBytes);
 
-                            } while (sourceBytes > 0);
-                        }
+                        } while (sourceBytes > 0);
+                    }
                     zipOutputStream.CloseEntry();
                 }
                 zipOutputStream.Finish();
@@ -112,7 +114,9 @@ namespace Backup_Service.Controllers
             }
             DeletingTemp();
             CreatingBackup();
-            return View("Archives");
+            var archives = _archiveService.GetArchives();
+
+            return View("Backups", archives);
         }
         public void CreatingBackup()
         {
@@ -120,22 +124,24 @@ namespace Backup_Service.Controllers
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
             var PathToFiles = Path.Combine(FolderPath + FilePaths);
+
             byte[] finalResult = System.IO.File.ReadAllBytes(PathToFiles);
             if (System.IO.File.Exists(PathToFiles))
             {
                 System.IO.File.Delete(PathToFiles);
             }
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", fileName);
-            System.IO.File.WriteAllBytes(filePath, finalResult); //Creating backup
+            System.IO.File.WriteAllBytes(filePath, finalResult);    //Creating backup
         }
         public void DeletingTemp()
         {
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
+
             foreach (string file in FilePaths)
                 System.IO.File.Delete(file);    //Deleting Uploads
         }
-       
+
         public IActionResult Privacy()
         {
             return View();

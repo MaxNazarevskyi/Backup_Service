@@ -44,5 +44,12 @@
             <button class="btn btn-primary" type="submit" download>Download all files</button>
         </p>
     </form>
+    @if (ViewBag.MessageBackup != null)
+    {
+        <div class="alert alert-success alert-dismissible" style="margin-top:50px">
+            @ViewBag.MessageBackup
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        </div>
+    }
 </div>
 </body>

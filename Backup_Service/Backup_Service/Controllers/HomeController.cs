@@ -115,7 +115,12 @@ namespace Backup_Service.Controllers
             DeletingTemp();
             CreatingBackup();
             var archives = _archiveService.GetArchives();
+            return View("Backups", archives);
+        }
 
+        public IActionResult GetBackups()
+        {
+            var archives = _archiveService.GetArchives();
             return View("Backups", archives);
         }
         public void CreatingBackup()
@@ -142,6 +147,12 @@ namespace Backup_Service.Controllers
                 System.IO.File.Delete(file);    //Deleting Uploads
         }
 
+        public void OpenFolder()
+        {
+            var filePath = @"D:\Projects\Backup_Service\Backup_Service\Backup_Service\wwwroot\Backups";
+
+            Process.Start("explorer.exe", string.Format("\"{0}\"", filePath));
+        }
         public IActionResult Privacy()
         {
             return View();

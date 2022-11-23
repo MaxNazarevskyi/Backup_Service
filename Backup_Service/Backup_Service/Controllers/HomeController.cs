@@ -75,7 +75,7 @@ namespace Backup_Service.Controllers
         }
 
         [HttpGet]
-        public IActionResult DownloadArchive(int compressionLevel)
+        public IActionResult CreatingArchive(int compressionLevel)
         {
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
@@ -117,7 +117,6 @@ namespace Backup_Service.Controllers
             var archives = _archiveService.GetArchives();
             return View("Backups", archives);
         }
-
         public IActionResult GetBackups()
         {
             var archives = _archiveService.GetArchives();
@@ -138,6 +137,48 @@ namespace Backup_Service.Controllers
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", fileName);
             System.IO.File.WriteAllBytes(filePath, finalResult);    //Creating backup
         }
+        [HttpGet]
+        public async Task<IActionResult> Download(string filename)
+        {
+            if (filename == null)
+                return Content("filename is not availble");
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", filename);
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, GetContentType(path), Path.GetFileName(path));
+        }
+
+        private string GetContentType(string path)
+        {
+            var types = GetMimeTypes();
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types[ext];
+        }
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                {".txt", "text/plain"},
+                {".pdf", "application/pdf"},
+                {".doc", "application/vnd.ms-word"},
+                {".docx", "application/vnd.ms-word"},
+                {".xls", "application/vnd.ms-excel"},
+                {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+                {".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"},
+                {".csv", "text/csv"},
+                {".mp3", "music/mp3"},
+                {".zip", "application/zip"}
+            };
+        }
         public void DeletingTemp()
         {
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
@@ -147,12 +188,6 @@ namespace Backup_Service.Controllers
                 System.IO.File.Delete(file);    //Deleting Uploads
         }
 
-        public void OpenFolder()
-        {
-            var filePath = @"D:\Projects\Backup_Service\Backup_Service\Backup_Service\wwwroot\Backups";
-
-            Process.Start("explorer.exe", string.Format("\"{0}\"", filePath));
-        }
         public IActionResult Privacy()
         {
             return View();

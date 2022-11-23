@@ -11,16 +11,12 @@
         @foreach (var item in Model.Archives)
         {
             <li>
-                  @item.ArchiveName
+                <a asp-action="Download"
+                   asp-route-filename="@item.ArchiveName">
+                    @item.ArchiveName
+                </a>
             </li>
         }
     </ul>
-    <form asp-controller="Home" asp-action="OpenFolder">
-        <br /><br />
-        <p class="text-left">
-            <button class="btn btn-primary" type="submit">Open backup folder</button>
-        </p>
-    </form>
-
 </div>
 </body>

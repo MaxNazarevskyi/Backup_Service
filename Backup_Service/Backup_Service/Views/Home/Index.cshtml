@@ -23,7 +23,7 @@
         </div>
     }
 
-    <p style="margin-top: 50px">List of Archives</p>
+    <p style="margin-top: 50px">List of files</p>
     <!-- Get all the files from the server -->
     <ul>
         @foreach (var item in Model.Files)
@@ -36,12 +36,12 @@
             </li>
         }
     </ul>
-    <form asp-controller="Home" asp-action="DownloadArchive" method="get">
+    <form asp-controller="Home" asp-action="CreatingArchive" method="get">
         <td>Enter compression level (0-9)</td>
         <input type="number" name="compressionLevel" value=""/>
         <br /><br />
         <p class="text-left">
-            <button class="btn btn-primary" type="submit" download>Download all files</button>
+            <button class="btn btn-primary" type="submit" download>Create backup</button>
         </p>
     </form>
     @if (ViewBag.MessageBackup != null)

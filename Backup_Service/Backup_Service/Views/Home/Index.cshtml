@@ -15,15 +15,22 @@
     </form>
 
     <!-- To show the success message to the user  -->
-    @if (ViewBag.Message != null)
+    @if (ViewBag.MessageOK != null)
     {
         <div class="alert alert-success alert-dismissible" style="margin-top:50px">
-            @ViewBag.Message
+            @ViewBag.MessageOK
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        </div>
+    }
+    @if (ViewBag.MessageNOT != null)
+    {
+        <div class="alert alert-danger alert-dismissible" style="margin-top:50px">
+            @ViewBag.MessageNOT
             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
         </div>
     }
 
-    <p style="margin-top: 50px">List of files</p>
+        <p style="margin-top: 50px">List of files</p>
     <!-- Get all the files from the server -->
     <ul>
         @foreach (var item in Model.Files)
@@ -37,8 +44,8 @@
         }
     </ul>
     <form asp-controller="Home" asp-action="CreatingArchive" method="get">
-        <td>Enter compression level (0-9)</td>
-        <input type="number" name="compressionLevel" value=""/>
+        <label for="compressionLevel">Enter compression level (between 0 and 9):</label>
+        <input type="number" id="compressionLevel" name="compressionLevel" min="0" max="9" value="9"/>
         <br /><br />
         <p class="text-left">
             <button class="btn btn-primary" type="submit" download>Create backup</button>
@@ -46,7 +53,7 @@
     </form>
     @if (ViewBag.MessageBackup != null)
     {
-        <div class="alert alert-success alert-dismissible" style="margin-top:50px">
+        <div class="alert alert-danger alert-dismissible" style="margin-top:50px">
             @ViewBag.MessageBackup
             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
         </div>

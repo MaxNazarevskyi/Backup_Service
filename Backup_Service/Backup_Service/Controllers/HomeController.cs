@@ -47,22 +47,25 @@ namespace Backup_Service.Controllers
         {
             foreach (var file in files)
             {
-                var fileName = Path.GetFileName(file.FileName);
-
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", fileName);
-
-                if (System.IO.File.Exists(filePath))
+                if (file.FileName != null)
                 {
-                    System.IO.File.Delete(filePath);
-                }
+                    var fileName = Path.GetFileName(file.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", fileName);
 
-                using (var localFile = System.IO.File.OpenWrite(filePath))
-                using (var uploadedFile = file.OpenReadStream())
-                {
-                    uploadedFile.CopyTo(localFile);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+
+                    using (var localFile = System.IO.File.OpenWrite(filePath))
+                    using (var uploadedFile = file.OpenReadStream())
+                    {
+                        uploadedFile.CopyTo(localFile);
+                    }
+                    ViewBag.MessageOK = "Files are successfully uploaded";
                 }
+                else { ViewBag.MessageNOT = "Files not found"; }
             }
-            ViewBag.Message = "Files are successfully uploaded";
 
             // Get files from the server
             var model = new FilesViewModel();
@@ -73,13 +76,19 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
-
+        public void FilesNotFound()
+        {
+            ViewBag.MessageBackup = "Files not found";
+        }
         [HttpGet]
         public IActionResult CreatingArchive(int compressionLevel)
-        {
+        { 
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
             var PathToFiles = Path.Combine(FolderPath + FilePaths);
+
+            if (Directory.GetFileSystemEntries(FolderPath).Length == 0)
+                return RedirectToAction("FilesNotFound");
 
             using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));
             {

@@ -114,8 +114,8 @@ namespace Backup_Service.Controllers
             }
             DeletingTemp();
             CreatingBackup();
-            var archives = _archiveService.GetArchives();
-            return View("Backups", archives);
+
+            return RedirectToAction("GetBackups");
         }
         public IActionResult GetBackups()
         {
@@ -164,18 +164,6 @@ namespace Backup_Service.Controllers
         {
             return new Dictionary<string, string>
             {
-                {".txt", "text/plain"},
-                {".pdf", "application/pdf"},
-                {".doc", "application/vnd.ms-word"},
-                {".docx", "application/vnd.ms-word"},
-                {".xls", "application/vnd.ms-excel"},
-                {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-                {".png", "image/png"},
-                {".jpg", "image/jpeg"},
-                {".jpeg", "image/jpeg"},
-                {".gif", "image/gif"},
-                {".csv", "text/csv"},
-                {".mp3", "music/mp3"},
                 {".zip", "application/zip"}
             };
         }

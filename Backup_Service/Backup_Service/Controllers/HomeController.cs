@@ -32,7 +32,8 @@ namespace Backup_Service.Controllers
 
         public IActionResult Index()
         {
-            // Get files from the server
+            DeletingTemp();
+
             var model = new FilesViewModel();
             foreach (var item in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload")))
             {
@@ -43,7 +44,7 @@ namespace Backup_Service.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(IFormFile[] files)
+        public IActionResult Index(IList<IFormFile> files)
         {
             foreach (var file in files)
             {
@@ -51,6 +52,9 @@ namespace Backup_Service.Controllers
                 {
                     var fileName = Path.GetFileName(file.FileName);
                     var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload", fileName);
+
+                    long FileSizeKb = GetFilesSizeUpload();
+                    long FileSizeMb = FileSizeKb / (1024 * 1024);
 
                     if (System.IO.File.Exists(filePath))
                     {
@@ -62,6 +66,8 @@ namespace Backup_Service.Controllers
                     {
                         uploadedFile.CopyTo(localFile);
                     }
+                    if (FileSizeMb > 100)
+                        return RedirectToAction("SizeYourFilesBiggerThanStorage");
                     ViewBag.MessageOK = "Files are successfully uploaded";
                 }
                 else { ViewBag.MessageNOT = "Files not found"; }
@@ -80,6 +86,38 @@ namespace Backup_Service.Controllers
         {
             ViewBag.MessageBackup = "Files not found";
         }
+        public void StorageIsFull()
+        {
+            DeletingTemp();
+            ViewBag.MessageBackup = "Storage Is Full";
+        }
+        public long GetFilesSizeUpload()
+        {
+            var FolderPathBackup = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
+            var FilePaths = Directory.GetFiles(FolderPathBackup);
+            long FileSizeSum = 0;
+
+            foreach (var FilePath in FilePaths)
+            {
+                long FileSize = new FileInfo(FilePath).Length;
+                FileSizeSum += FileSize;
+            }
+            return FileSizeSum;
+        }
+        public long GetFilesSizeBackup()
+        {
+            var FolderPathBackup = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Backups");
+            var FilePaths = Directory.GetFiles(FolderPathBackup);
+            long FileSizeSum = 0;
+
+            foreach (var FilePath in FilePaths)
+            {
+                long FileSize = new FileInfo(FilePath).Length;
+                FileSizeSum += FileSize;
+            }
+                return FileSizeSum;
+
+        }
         [HttpGet]
         public IActionResult CreatingArchive(int compressionLevel)
         { 
@@ -89,6 +127,12 @@ namespace Backup_Service.Controllers
 
             if (Directory.GetFileSystemEntries(FolderPath).Length == 0)
                 return RedirectToAction("FilesNotFound");
+
+            long FileSizeKb = GetFilesSizeBackup();
+            long FileSizeMb = FileSizeKb / (1024 * 1024);
+
+            if (FileSizeMb > 100)
+                return RedirectToAction("StorageIsFull");
 
             using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));
             {

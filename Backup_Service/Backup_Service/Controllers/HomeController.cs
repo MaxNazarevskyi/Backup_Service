@@ -42,7 +42,8 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
-
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = 1073741824, ValueLengthLimit = Int32.MaxValue)]
         [HttpPost]
         public IActionResult Index(IList<IFormFile> files)
         {
@@ -66,7 +67,7 @@ namespace Backup_Service.Controllers
                     {
                         uploadedFile.CopyTo(localFile);
                     }
-                    if (FileSizeMb > 100)
+                    if (FileSizeMb > 1024)
                         return RedirectToAction("SizeYourFilesBiggerThanStorage");
                     ViewBag.MessageOK = "Files are successfully uploaded";
                 }
@@ -131,7 +132,7 @@ namespace Backup_Service.Controllers
             long FileSizeKb = GetFilesSizeBackup();
             long FileSizeMb = FileSizeKb / (1024 * 1024);
 
-            if (FileSizeMb > 100)
+            if (FileSizeMb > 300)
                 return RedirectToAction("StorageIsFull");
 
             using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));

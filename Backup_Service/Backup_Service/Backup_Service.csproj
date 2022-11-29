@@ -4,10 +4,11 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <PackageReference Include="DotNetZip" Version="1.16.0" />
-	  <PackageReference Include="EntityFramework" Version="6.4.4" />
 	  <PackageReference Include="Grpc.Core" Version="2.46.5" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
+	  <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.4" />
 	  <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
+	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
 	  <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>

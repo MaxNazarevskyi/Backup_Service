@@ -83,9 +83,9 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
-        public void FilesNotFound()
+        public IActionResult FilesNotFound()
         {
-            ViewBag.MessageBackup = "Files not found";
+            return View("FilesNotFound");
         }
         public void StorageIsFull()
         {

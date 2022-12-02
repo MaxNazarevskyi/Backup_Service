@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backup_Service.Data.DataModels
@@ -16,5 +17,7 @@ namespace Backup_Service.Data.DataModels
         [Required]
         [StringLength(255)]
         public string Password { get; set; } = null!;
+
+        public virtual ICollection<Files> Files { get; set; }
     }
 }

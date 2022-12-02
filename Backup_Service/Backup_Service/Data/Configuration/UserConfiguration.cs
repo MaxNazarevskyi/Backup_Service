@@ -17,6 +17,8 @@ namespace Backup_Service.Data.Configuration
             builder.Property(u => u.Username).IsRequired();
             builder.Property(u => u.Password).IsRequired();
 
+
+
         }
     }
 }

@@ -8,6 +8,8 @@ using Backup_Service.Data.Repository;
 using Backup_Service.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
+using Backup_Service.Data.DataModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace Backup_Service
 {
@@ -30,6 +32,8 @@ namespace Backup_Service
                 options.UseMySql(Configuration.GetConnectionString("MySqlDatabase"),
                                  ServerVersion.AutoDetect(Configuration.GetConnectionString("MySqlDatabase"))));
             services.AddScoped<IArchiveService, ArchiveService>();
+            services.AddScoped<ILoginService, LoginService>();
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddControllersWithViews();
         }
 
@@ -57,7 +61,7 @@ namespace Backup_Service
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Authentication}/{action=Login}/{id?}");
             });
             dbContext.Database.EnsureCreated();
         }

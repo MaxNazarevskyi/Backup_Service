@@ -13,10 +13,13 @@ namespace Backup_Service.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new FilesConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<User> Users { get; set; }
+
+        public DbSet<Files> Files { get; set; }
     }
 }

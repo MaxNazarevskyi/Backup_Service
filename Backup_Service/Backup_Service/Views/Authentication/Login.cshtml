@@ -1,0 +1,65 @@
+﻿@model Backup_Service.Models.LoginFormModel
+
+@{
+    Layout = null;
+}
+<!DOCTYPE html>   
+<html>   
+<head>  
+<meta name="viewport" content="width=device-width, initial-scale=1">  
+<title> Login Page </title>  
+<style>   
+Body {  
+  font-family: Calibri, Helvetica;  
+  background-color: yellowgreen;  
+}  
+button {   
+        background-color: #4ABF30;   
+        width: 100%;  
+        color: blue;   
+        padding: 10px;   
+        margin: 15px 10px;   
+        border: none;   
+        cursor: pointer;   
+       }   
+ form {   
+        border: 3px solid #f1f1f1;   
+    }   
+ input[type=text], input[type=password] {   
+        width: 100%;   
+        margin: 8px 0;  
+        padding: 12px 20px;   
+        display: inline-block;   
+        border: 2px solid green;   
+        box-sizing: border-box;   
+    }  
+ button:hover {   
+        opacity: 0.5;   
+    }   
+  .cancelbtn {   
+        width: auto;   
+        padding: 10px 10px;  
+        margin: 10px 5px;  
+    }   
+        
+     
+ .container {   
+        padding: 15px;   
+        background-color: navajowhite;  
+    }   
+</style>   
+</head>    
+<body>    
+    <center> <h1> Login </h1> </center>   
+    <form asp-action="CheckLogin" asp-controller="Authentication" method="post">  
+        <div class="container">   
+            <label>Username : </label>   
+            <input type="text" placeholder="Enter Username" name="login" required>  
+            <label>Password : </label>   
+            <input type="password" placeholder="Enter Password" name="password" required>
+            <a asp-action="Register" asp-controller="Authentication">Register please</a>
+            <button type="submit">Login</button> 
+        </div>   
+    </form>     
+</body>     
+</html>

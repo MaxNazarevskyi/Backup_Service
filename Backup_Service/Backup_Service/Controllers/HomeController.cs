@@ -22,16 +22,25 @@ namespace Backup_Service.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly IArchiveService _archiveService;
+        private readonly ILoginService _loginService;
 
-        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostEnvironment, IArchiveService archiveService)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostEnvironment, IArchiveService archiveService, ILoginService loginService)
         {
             _archiveService = archiveService;
             _logger = logger;
             _hostEnvironment = hostEnvironment;
+            _loginService = loginService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            string token = null;
+            if (!Request.Cookies.TryGetValue("token", out token))
+                return RedirectToAction("Login", "Authentication");
+
+            var user = await _loginService.CheckToken(token);
+            if (user == null)
+                return RedirectToAction("Login", "Authentication");
             DeletingTemp();
 
             var model = new FilesViewModel();
@@ -42,6 +51,7 @@ namespace Backup_Service.Controllers
             }
             return View(model);
         }
+
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = 1073741824, ValueLengthLimit = Int32.MaxValue)]
         [HttpPost]

@@ -9,5 +9,6 @@ namespace Backup_Service.Services
         public Task<User> Register(string login, string password);
         public Task<User> CheckToken(string token);
         public string CreateToken(int userId, string password);
+        public int GetUserId(string token);
     }
 }

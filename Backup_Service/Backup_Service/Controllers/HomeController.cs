@@ -1,35 +1,35 @@
 ﻿using Backup_Service.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Text;
 using Microsoft.AspNetCore.Hosting;
-using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip;
-using ICSharpCode.SharpZipLib.Core;
 using Backup_Service.Services;
 
 namespace Backup_Service.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly IArchiveService _archiveService;
         private readonly ILoginService _loginService;
+        private readonly IUserService _userService;
 
-        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment hostEnvironment, IArchiveService archiveService, ILoginService loginService)
+
+        public HomeController(
+            IWebHostEnvironment hostEnvironment,
+            IArchiveService archiveService,
+            ILoginService loginService,
+            IUserService userService)
         {
             _archiveService = archiveService;
-            _logger = logger;
             _hostEnvironment = hostEnvironment;
             _loginService = loginService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
@@ -126,8 +126,7 @@ namespace Backup_Service.Controllers
                 long FileSize = new FileInfo(FilePath).Length;
                 FileSizeSum += FileSize;
             }
-                return FileSizeSum;
-
+            return FileSizeSum;
         }
         [HttpGet]
         public IActionResult CreatingArchive(int compressionLevel)
@@ -142,7 +141,7 @@ namespace Backup_Service.Controllers
             long FileSizeKb = GetFilesSizeBackup();
             long FileSizeMb = FileSizeKb / (1024 * 1024);
 
-            if (FileSizeMb > 300)
+            if (FileSizeMb > 1024)
                 return RedirectToAction("StorageIsFull");
 
             using ZipOutputStream zipOutputStream = new ZipOutputStream(System.IO.File.Create(Path.Combine(PathToFiles)));
@@ -181,13 +180,38 @@ namespace Backup_Service.Controllers
 
             return RedirectToAction("GetBackups");
         }
+        public ArchivesModel GetArchives()
+        {
+            string token = null;
+            Request.Cookies.TryGetValue("token", out token);
+            var user = _userService.GetUserById(_loginService.GetUserId(token));
+            long FileSizeSum = 0;
+            long FileSizeMb = 0;
+            var model = new ArchivesModel();
+            model.Archives = new List<ArchivesParams>();
+
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", user.Username));
+            foreach (var item in Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", user.Username)))
+            {
+                long FileSize = new FileInfo(item).Length;
+                FileSizeSum += FileSize;
+                FileSizeMb = FileSizeSum / (1024 * 1024);
+
+                model.Archives.Add(
+                    new ArchivesParams { ArchiveName = Path.GetFileName(item), ArchivePath = item, ArchivesSize = FileSizeMb });
+            }
+            return model;
+        }
         public IActionResult GetBackups()
         {
-            var archives = _archiveService.GetArchives();
+            var archives = GetArchives();
             return View("Backups", archives);
         }
         public void CreatingBackup()
         {
+            string token = null;
+            Request.Cookies.TryGetValue("token", out token);
+            var user = _userService.GetUserById(_loginService.GetUserId(token));
             var fileName = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + ".zip";
             var FolderPath = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/Upload");
             var FilePaths = Directory.GetFiles(FolderPath);
@@ -198,16 +222,20 @@ namespace Backup_Service.Controllers
             {
                 System.IO.File.Delete(PathToFiles);
             }
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", fileName);
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", user.Username));
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", user.Username, fileName);
             System.IO.File.WriteAllBytes(filePath, finalResult);    //Creating backup
         }
         [HttpGet]
         public async Task<IActionResult> Download(string filename)
         {
+            string token = null;
+            Request.Cookies.TryGetValue("token", out token);
+            var user = _userService.GetUserById(_loginService.GetUserId(token));
             if (filename == null)
                 return Content("filename is not availble");
 
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", filename);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups", user.Username, filename);
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))

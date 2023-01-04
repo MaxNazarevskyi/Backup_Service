@@ -1,4 +1,5 @@
-﻿using Backup_Service.Models;
+﻿using Backup_Service.Data.DataModels;
+using Backup_Service.Models;
 
 namespace Backup_Service.Services
 {

@@ -47,7 +47,7 @@ namespace Backup_Service.Services
         }
         public async Task<User> CheckToken(string token)
         {
-            var userId = int.Parse(token.Split(":")[0]);
+            var userId = GetUserId(token);
             var user = await _repository.GetByIdAsync(userId);
             if (user == null)
             {
@@ -65,6 +65,10 @@ namespace Backup_Service.Services
         public string CreateToken(int userId, string password)
         {
             return $"{userId}:{password.GenerateSHA256Hash()}";
+        }
+        public int GetUserId(string token)
+        {
+            return int.Parse(token.Split(":")[0]);
         }
     }
 }

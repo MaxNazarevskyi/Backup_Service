@@ -3,6 +3,7 @@ using Backup_Service.Models;
 using Backup_Service.Services;
 using Backup_Service.Data.DataModels;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Backup_Service.Controllers
 {
@@ -44,7 +45,7 @@ namespace Backup_Service.Controllers
                 return RedirectToAction("Login");
             }
             Response.Cookies.Append("token", _loginService.CreateToken(user.Id, user.Password));
-
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Backups"));
             return RedirectToAction("Index", "Home");
         }
         [HttpPost]

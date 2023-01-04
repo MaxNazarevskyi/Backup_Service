@@ -34,6 +34,7 @@ namespace Backup_Service
             services.AddScoped<IArchiveService, ArchiveService>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped(typeof (IUserService),typeof (UserService));
             services.AddControllersWithViews();
         }
 

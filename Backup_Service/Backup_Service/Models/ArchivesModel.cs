@@ -6,6 +6,7 @@ namespace Backup_Service.Models
     {
         public string ArchiveName { get; set; }
         public string ArchivePath { get; set; }
+        public long ArchivesSize { get; set; }
     }
     public class ArchivesModel
     {

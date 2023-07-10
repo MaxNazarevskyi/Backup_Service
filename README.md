@@ -1,0 +1,2 @@
+### **V1.0**
+Project aimed to satisfy semi-automatical backups service for backing up folders and files using web interface. Used technologies: **ASP.NET Core, Entity Framework, MySQL, MVC, LINQ, SOLID, HTML, CSS**
